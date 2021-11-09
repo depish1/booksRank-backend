@@ -1,31 +1,13 @@
-import app from "./server.js";
-import mongodb from "mongodb";
-import dotenv from "dotenv";
-import DAO from "./api/DAO.js";
-import jwt from "jsonwebtoken";
+import express from "express";
+import cors from "cors";
+import books from "./api/books/books.route.js";
 
-dotenv.config();
+const app = express();
 
-const MongoClient = mongodb.MongoClient;
+app.use(cors());
+app.use(express.json());
 
-const port = process.env.PORT || 8000;
-const dao = new DAO();
+app.use("/api/books", books);
+app.use("*", (req, res) => res.status(404).json({ error: "not found" }));
 
-console.log("xd");
-
-MongoClient.connect(process.env.BOOKS_DB_URI, {
-  maxPoolSize: 50,
-  wtimeoutMS: 2500,
-  useNewUrlParser: true,
-})
-  .catch((err) => {
-    console.log("xdddddd");
-    console.error(err.stack);
-    process.exit(1);
-  })
-  .then(async (client) => {
-    await dao.injectDB(client);
-    app.listen(port, () => {
-      console.log(`listenning on port ${port}`);
-    });
-  });
+export default app;
